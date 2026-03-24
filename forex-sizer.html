@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FX Sizer — Position Calculator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0c0f;
+    --surface: #111418;
+    --surface2: #181c22;
+    --border: #242830;
+    --border-light: #2e3540;
+    --accent: #00e5a0;
+    --accent-dim: rgba(0,229,160,0.12);
+    --accent-dim2: rgba(0,229,160,0.06);
+    --red: #ff4d6d;
+    --red-dim: rgba(255,77,109,0.12);
+    --yellow: #ffd166;
+    --yellow-dim: rgba(255,209,102,0.12);
+    --text: #e8edf5;
+    --text-muted: #6b7585;
+    --text-mid: #9aa3b0;
+    --mono: 'Space Mono', monospace;
+    --sans: 'DM Sans', sans-serif;
+    --radius: 10px;
+    --radius-sm: 6px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    min-height: 100vh;
+    padding: 0;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Header ── */
+  header {
+    padding: 18px 20px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    background: rgba(10,12,15,0.92);
+    backdrop-filter: blur(12px);
+    z-index: 100;
+  }
+  .logo {
+    font-family: var(--mono);
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: var(--accent);
+  }
+  .logo span { color: var(--text-muted); font-weight: 400; }
+  .header-right { display: flex; align-items: center; gap: 10px; }
+  .gear-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text-mid);
+    border-radius: var(--radius-sm);
+    width: 36px; height: 36px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    transition: all 0.15s;
+  }
+  .gear-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* ── Main Layout ── */
+  main { padding: 16px; max-width: 520px; margin: 0 auto; }
+
+  /* ── Settings Panel ── */
+  .settings-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 14px;
+    display: none;
+    animation: slideDown 0.18s ease;
+  }
+  .settings-panel.open { display: block; }
+  @keyframes slideDown { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:translateY(0); } }
+  .settings-title {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .settings-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .settings-row label {
+    font-size: 13px;
+    color: var(--text-mid);
+    flex: 1;
+    min-width: 120px;
+  }
+  .settings-row input[type="number"] {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 14px;
+    border-radius: var(--radius-sm);
+    padding: 8px 10px;
+    width: 80px;
+    text-align: right;
+    outline: none;
+  }
+  .settings-row input[type="number"]:focus { border-color: var(--accent); }
+  .pct-label { font-family: var(--mono); font-size: 12px; color: var(--text-muted); }
+
+  /* ── Account Row ── */
+  .account-row {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .account-row label {
+    font-size: 12px;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+  .account-row .input-wrap {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 0 10px;
+    gap: 4px;
+  }
+  .account-row .input-wrap:focus-within { border-color: var(--accent); }
+  .currency-sym {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+  .account-row input {
+    background: transparent;
+    border: none;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 15px;
+    font-weight: 700;
+    padding: 9px 4px;
+    width: 100%;
+    outline: none;
+  }
+  .risk-badge {
+    background: var(--accent-dim);
+    border: 1px solid rgba(0,229,160,0.25);
+    border-radius: var(--radius-sm);
+    padding: 5px 10px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--accent);
+    white-space: nowrap;
+    cursor: pointer;
+  }
+
+  /* ── Signal Paste Area ── */
+  .section-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .signal-area {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 2px;
+    margin-bottom: 14px;
+    transition: border-color 0.15s;
+  }
+  .signal-area:focus-within { border-color: var(--border-light); }
+  .signal-area textarea {
+    background: transparent;
+    border: none;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 12.5px;
+    line-height: 1.7;
+    padding: 12px 14px;
+    width: 100%;
+    min-height: 130px;
+    resize: none;
+    outline: none;
+    caret-color: var(--accent);
+  }
+  .signal-area textarea::placeholder { color: var(--text-muted); }
+  .signal-actions {
+    display: flex;
+    gap: 8px;
+    padding: 8px 10px;
+    border-top: 1px solid var(--border);
+  }
+  .btn-parse {
+    flex: 1;
+    background: var(--accent);
+    color: #000;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    padding: 9px 16px;
+    cursor: pointer;
+    transition: opacity 0.15s, transform 0.1s;
+  }
+  .btn-parse:hover { opacity: 0.88; }
+  .btn-parse:active { transform: scale(0.98); }
+  .btn-clear {
+    background: var(--surface2);
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-family: var(--mono);
+    font-size: 12px;
+    padding: 9px 14px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-clear:hover { border-color: var(--red); color: var(--red); }
+
+  /* ── Parsed Signal Summary ── */
+  .parsed-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 14px;
+    overflow: hidden;
+    animation: fadeIn 0.2s ease;
+    display: none;
+  }
+  .parsed-card.show { display: block; }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(4px); } to { opacity:1; transform:translateY(0); } }
+
+  .parsed-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .instrument-tag {
+    font-family: var(--mono);
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: 0.04em;
+  }
+  .direction-badge {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    padding: 4px 10px;
+    border-radius: 4px;
+  }
+  .direction-badge.buy {
+    background: var(--accent-dim);
+    color: var(--accent);
+    border: 1px solid rgba(0,229,160,0.3);
+  }
+  .direction-badge.sell {
+    background: var(--red-dim);
+    color: var(--red);
+    border: 1px solid rgba(255,77,109,0.3);
+  }
+
+  .price-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+  }
+  .price-cell {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+  }
+  .price-cell:nth-child(even) { border-right: none; }
+  .price-cell:nth-last-child(-n+2) { border-bottom: none; }
+  .price-cell.full-width {
+    grid-column: 1 / -1;
+    border-right: none;
+  }
+  .price-label {
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    margin-bottom: 3px;
+  }
+  .price-value {
+    font-family: var(--mono);
+    font-size: 14px;
+    color: var(--text);
+    font-weight: 700;
+  }
+  .price-value.entry { color: var(--yellow); }
+  .price-value.tp { color: var(--accent); }
+  .price-value.sl { color: var(--red); }
+
+  /* ── Pip Warning ── */
+  .pip-warning {
+    margin: 0 14px 12px;
+    background: rgba(255,209,102,0.08);
+    border: 1px solid rgba(255,209,102,0.25);
+    border-radius: var(--radius-sm);
+    padding: 8px 12px;
+    font-size: 12px;
+    color: var(--yellow);
+    display: none;
+    gap: 6px;
+    align-items: flex-start;
+  }
+  .pip-warning.show { display: flex; }
+  .pip-warning .warn-icon { font-size: 13px; flex-shrink: 0; margin-top: 1px; }
+
+  /* ── Results Card ── */
+  .results-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 14px;
+    overflow: hidden;
+    display: none;
+    animation: fadeIn 0.2s ease;
+  }
+  .results-card.show { display: block; }
+
+  .results-header {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .results-title {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+  }
+
+  /* Lot Size Hero */
+  .lot-hero {
+    padding: 18px 14px 14px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .lot-number {
+    font-family: var(--mono);
+    font-size: 38px;
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1;
+    letter-spacing: -0.01em;
+  }
+  .lot-unit {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--text-muted);
+    padding-bottom: 5px;
+  }
+  .lot-meta {
+    margin-left: auto;
+    text-align: right;
+  }
+  .lot-meta .risk-amt {
+    font-family: var(--mono);
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--red);
+  }
+  .lot-meta .risk-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  /* TP Table */
+  .tp-table { width: 100%; border-collapse: collapse; }
+  .tp-table th {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    padding: 8px 14px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    font-weight: 400;
+  }
+  .tp-table th:not(:first-child) { text-align: right; }
+  .tp-table td {
+    padding: 10px 14px;
+    font-family: var(--mono);
+    font-size: 13px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+  .tp-table tr:last-child td { border-bottom: none; }
+  .tp-table td:not(:first-child) { text-align: right; }
+
+  .tp-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .tp-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--accent);
+    opacity: 0.5;
+    flex-shrink: 0;
+  }
+  .tp-dot.tp1 { opacity: 1; }
+  .tp-dot.tp2 { opacity: 0.7; }
+  .tp-dot.tp3 { opacity: 0.45; }
+
+  .rr-pill {
+    display: inline-block;
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 700;
+  }
+  .rr-low { background: var(--yellow-dim); color: var(--yellow); }
+  .rr-mid { background: var(--accent-dim); color: var(--accent); }
+  .rr-high { background: rgba(0,229,160,0.22); color: var(--accent); }
+
+  .gain-positive { color: var(--accent); }
+  .gain-muted { color: var(--text-mid); }
+
+  /* ── Error State ── */
+  .error-banner {
+    background: var(--red-dim);
+    border: 1px solid rgba(255,77,109,0.3);
+    border-radius: var(--radius);
+    padding: 12px 14px;
+    font-size: 13px;
+    color: var(--red);
+    margin-bottom: 14px;
+    display: none;
+    align-items: center;
+    gap: 8px;
+  }
+  .error-banner.show { display: flex; }
+
+  /* ── Pip Info Row ── */
+  .pip-info-row {
+    padding: 10px 14px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .pip-info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .pip-info-label {
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+  }
+  .pip-info-value {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text-mid);
+  }
+  .pip-match { color: var(--accent); }
+  .pip-mismatch { color: var(--yellow); }
+
+  /* ── Scrollbar ── */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 4px; }
+
+  /* ── Safe area for mobile ── */
+  .bottom-pad { height: 40px; }
+
+  /* ── Input number spinner hide ── */
+  input[type=number]::-webkit-inner-spin-button,
+  input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; }
+  input[type=number] { -moz-appearance: textfield; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">FX<span>/</span>SIZER</div>
+  <div class="header-right">
+    <button class="gear-btn" id="gearBtn" title="Settings">⚙</button>
+  </div>
+</header>
+
+<main>
+
+  <!-- Settings Panel -->
+  <div class="settings-panel" id="settingsPanel">
+    <div class="settings-title">Risk Settings</div>
+    <div class="settings-row">
+      <label>Risk per trade</label>
+      <input type="number" id="riskPct" value="1" min="0.1" max="100" step="0.1">
+      <span class="pct-label">%</span>
+    </div>
+  </div>
+
+  <!-- Account Balance -->
+  <div class="account-row">
+    <label>Account Balance</label>
+    <div class="input-wrap">
+      <span class="currency-sym">$</span>
+      <input type="number" id="accountBalance" placeholder="10000" min="0" step="100">
+    </div>
+    <div class="risk-badge" id="riskBadge">1% risk</div>
+  </div>
+
+  <!-- Signal Input -->
+  <div class="section-label">Signal Input</div>
+  <div class="signal-area">
+    <textarea id="signalInput" placeholder="Paste your signal here…
+
+SIGNAL ALERT
+SELL XAUUSD 4495.3
+TP1: 4493.3
+TP2: 4490.3
+TP3: 4477.3
+SL: 4513.3 (1800 pips)"></textarea>
+    <div class="signal-actions">
+      <button class="btn-parse" id="parseBtn">▶ CALCULATE</button>
+      <button class="btn-clear" id="clearBtn">CLEAR</button>
+    </div>
+  </div>
+
+  <!-- Error Banner -->
+  <div class="error-banner" id="errorBanner">
+    <span>⚠</span>
+    <span id="errorMsg">Could not parse signal. Please check format.</span>
+  </div>
+
+  <!-- Parsed Signal Card -->
+  <div class="parsed-card" id="parsedCard">
+    <div class="parsed-header">
+      <span class="instrument-tag" id="displayInstrument">XAUUSD</span>
+      <span class="direction-badge" id="displayDirection">SELL</span>
+    </div>
+    <div class="price-grid">
+      <div class="price-cell">
+        <div class="price-label">Entry</div>
+        <div class="price-value entry" id="displayEntry">—</div>
+      </div>
+      <div class="price-cell">
+        <div class="price-label">Stop Loss</div>
+        <div class="price-value sl" id="displaySL">—</div>
+      </div>
+      <div class="price-cell">
+        <div class="price-label">TP1</div>
+        <div class="price-value tp" id="displayTP1">—</div>
+      </div>
+      <div class="price-cell">
+        <div class="price-label">TP2</div>
+        <div class="price-value tp" id="displayTP2">—</div>
+      </div>
+      <div class="price-cell full-width">
+        <div class="price-label">TP3</div>
+        <div class="price-value tp" id="displayTP3">—</div>
+      </div>
+    </div>
+
+    <!-- Pip warning -->
+    <div class="pip-warning" id="pipWarning">
+      <span class="warn-icon">⚠</span>
+      <span id="pipWarningMsg"></span>
+    </div>
+  </div>
+
+  <!-- Results Card -->
+  <div class="results-card" id="resultsCard">
+    <div class="results-header">
+      <span class="results-title">Position Sizing</span>
+    </div>
+    <div class="lot-hero">
+      <div class="lot-number" id="lotSize">—</div>
+      <div class="lot-unit">lots</div>
+      <div class="lot-meta">
+        <div class="risk-amt" id="riskAmount">—</div>
+        <div class="risk-label">max risk (USD)</div>
+      </div>
+    </div>
+
+    <table class="tp-table">
+      <thead>
+        <tr>
+          <th>Target</th>
+          <th>Price</th>
+          <th>Gain</th>
+          <th>R:R</th>
+        </tr>
+      </thead>
+      <tbody id="tpTableBody"></tbody>
+    </table>
+
+    <div class="pip-info-row">
+      <div class="pip-info-item">
+        <span class="pip-info-label">SL Pips (calc)</span>
+        <span class="pip-info-value" id="pipCalc">—</span>
+      </div>
+      <div class="pip-info-item">
+        <span class="pip-info-label">SL Pips (signal)</span>
+        <span class="pip-info-value" id="pipSignal">—</span>
+      </div>
+      <div class="pip-info-item">
+        <span class="pip-info-label">Pip Value / lot</span>
+        <span class="pip-info-value" id="pipValue">—</span>
+      </div>
+      <div class="pip-info-item">
+        <span class="pip-info-label">Instrument Type</span>
+        <span class="pip-info-value" id="instrType">—</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="bottom-pad"></div>
+</main>
+
+<script>
+// ── Instrument Database ──────────────────────────────────────────────
+// pipSize: the minimum price movement counted as 1 pip
+// pipValuePerLot: USD value of 1 pip for 1 standard lot
+// For cross-currency pairs, pip value in USD varies with exchange rate.
+// We store a type and handle dynamically where needed.
+const INSTRUMENTS = {
+  // Metals
+  XAUUSD: { type: 'metal',   pipSize: 0.01,   pipValuePerLot: 1.00   }, // Gold: pip=$0.01, 1lot=100oz => $1/pip
+  XAGUSD: { type: 'metal',   pipSize: 0.001,  pipValuePerLot: 5.00   }, // Silver: approx
+  XPTUSD: { type: 'metal',   pipSize: 0.01,   pipValuePerLot: 1.00   },
+
+  // USD-quoted forex (1 pip = 0.0001, 1 lot = 100k units)
+  EURUSD: { type: 'forex_usd_quote', pipSize: 0.0001, pipValuePerLot: 10 },
+  GBPUSD: { type: 'forex_usd_quote', pipSize: 0.0001, pipValuePerLot: 10 },
+  AUDUSD: { type: 'forex_usd_quote', pipSize: 0.0001, pipValuePerLot: 10 },
+  NZDUSD: { type: 'forex_usd_quote', pipSize: 0.0001, pipValuePerLot: 10 },
+
+  // JPY pairs (pip = 0.01)
+  USDJPY: { type: 'forex_jpy', pipSize: 0.01, pipValuePerLot: null }, // ~$6.50–$9 depending on rate; calculated dynamically via approximate
+  EURJPY: { type: 'forex_jpy', pipSize: 0.01, pipValuePerLot: null },
+  GBPJPY: { type: 'forex_jpy', pipSize: 0.01, pipValuePerLot: null },
+  AUDJPY: { type: 'forex_jpy', pipSize: 0.01, pipValuePerLot: null },
+  CADJPY: { type: 'forex_jpy', pipSize: 0.01, pipValuePerLot: null },
+  CHFJPY: { type: 'forex_jpy', pipSize: 0.01, pipValuePerLot: null },
+  NZDJPY: { type: 'forex_jpy', pipSize: 0.01, pipValuePerLot: null },
+
+  // USD-base pairs (pip value in quote currency, need conversion)
+  USDCAD: { type: 'forex_cad_quote', pipSize: 0.0001, pipValuePerLot: null },
+  USDCHF: { type: 'forex_chf_quote', pipSize: 0.0001, pipValuePerLot: null },
+
+  // Cross pairs (approximated via USD equivalent)
+  EURGBP: { type: 'forex_cross', pipSize: 0.0001, pipValuePerLot: 13 }, // approx
+  EURAUD: { type: 'forex_cross', pipSize: 0.0001, pipValuePerLot: 6.5 },
+  GBPAUD: { type: 'forex_cross', pipSize: 0.0001, pipValuePerLot: 6.5 },
+  GBPCAD: { type: 'forex_cross', pipSize: 0.0001, pipValuePerLot: 7.5 },
+  AUDCAD: { type: 'forex_cross', pipSize: 0.0001, pipValuePerLot: 7.3 },
+  AUDCHF: { type: 'forex_cross', pipSize: 0.0001, pipValuePerLot: 7.0 },
+
+  // Indices (point-based, treated like pip=1)
+  US30:   { type: 'index', pipSize: 1, pipValuePerLot: 1 },
+  US500:  { type: 'index', pipSize: 0.1, pipValuePerLot: 1 },
+  NAS100: { type: 'index', pipSize: 0.1, pipValuePerLot: 1 },
+  GER40:  { type: 'index', pipSize: 1, pipValuePerLot: 1 },
+
+  // Crypto (approximate)
+  BTCUSD: { type: 'crypto', pipSize: 1, pipValuePerLot: 1 },
+  ETHUSD: { type: 'crypto', pipSize: 0.01, pipValuePerLot: 1 },
+
+  // Oil
+  USOIL:  { type: 'commodity', pipSize: 0.01, pipValuePerLot: 10 },
+  UKOIL:  { type: 'commodity', pipSize: 0.01, pipValuePerLot: 10 },
+};
+
+function getInstrumentInfo(symbol) {
+  const upper = symbol.toUpperCase();
+  if (INSTRUMENTS[upper]) return { ...INSTRUMENTS[upper], symbol: upper, known: true };
+
+  // Fallback: guess from suffix
+  if (upper.endsWith('USD')) return { type: 'forex_usd_quote', pipSize: 0.0001, pipValuePerLot: 10, symbol: upper, known: false };
+  if (upper.endsWith('JPY')) return { type: 'forex_jpy',       pipSize: 0.01,   pipValuePerLot: 7,  symbol: upper, known: false };
+  return { type: 'forex_cross', pipSize: 0.0001, pipValuePerLot: 10, symbol: upper, known: false };
+}
+
+function getPipValuePerLot(info, entryPrice) {
+  if (info.pipValuePerLot !== null && info.pipValuePerLot !== undefined) return info.pipValuePerLot;
+  // JPY pairs: pip value = (pip_size * lot_size) / rate
+  if (info.type === 'forex_jpy') {
+    const lotSize = 100000;
+    return (info.pipSize * lotSize) / entryPrice; // approx USD pip value
+  }
+  // CAD quote: (pip_size * lot_size) / rate
+  if (info.type === 'forex_cad_quote' || info.type === 'forex_chf_quote') {
+    const lotSize = 100000;
+    return (info.pipSize * lotSize) / entryPrice;
+  }
+  return 10; // safe fallback
+}
+
+// ── Signal Parser ──────────────────────────────────────────────────
+function parseSignal(raw) {
+  const text = raw.trim();
+  if (!text) throw new Error('No signal text provided.');
+
+  // Direction: BUY or SELL
+  const dirMatch = text.match(/\b(BUY|SELL)\b/i);
+  if (!dirMatch) throw new Error('Could not find BUY or SELL in signal.');
+  const direction = dirMatch[1].toUpperCase();
+
+  // Instrument & Entry: e.g. "SELL XAUUSD 4495.3" or "BUY EURUSD 1.08500"
+  const instrMatch = text.match(/(?:BUY|SELL)\s+([A-Z0-9]+)\s+([\d.]+)/i);
+  if (!instrMatch) throw new Error('Could not parse instrument and entry price.');
+  const instrument = instrMatch[1].toUpperCase();
+  const entry = parseFloat(instrMatch[2]);
+
+  // TPs
+  const tp1Match = text.match(/TP1\s*[:=]?\s*([\d.]+)/i);
+  const tp2Match = text.match(/TP2\s*[:=]?\s*([\d.]+)/i);
+  const tp3Match = text.match(/TP3\s*[:=]?\s*([\d.]+)/i);
+
+  const tp1 = tp1Match ? parseFloat(tp1Match[1]) : null;
+  const tp2 = tp2Match ? parseFloat(tp2Match[1]) : null;
+  const tp3 = tp3Match ? parseFloat(tp3Match[1]) : null;
+
+  if (!tp1 && !tp2 && !tp3) throw new Error('No take profit levels found (TP1/TP2/TP3).');
+
+  // SL price and optional pip count in parentheses
+  const slMatch = text.match(/SL\s*[:=]?\s*([\d.]+)(?:\s*\((\d+)\s*pips?\))?/i);
+  if (!slMatch) throw new Error('Could not parse Stop Loss (SL).');
+  const sl = parseFloat(slMatch[1]);
+  const signalPips = slMatch[2] ? parseInt(slMatch[2]) : null;
+
+  return { direction, instrument, entry, tp1, tp2, tp3, sl, signalPips };
+}
+
+// ── Position Size Calculator ────────────────────────────────────────
+function calculate(parsed, accountBalance, riskPct) {
+  const { direction, instrument, entry, tp1, tp2, tp3, sl, signalPips } = parsed;
+
+  const info = getInstrumentInfo(instrument);
+  const pipSize = info.pipSize;
+  const pipValuePerLot = getPipValuePerLot(info, entry);
+
+  // Pip distance from entry to SL (always positive)
+  const rawSLDiff = Math.abs(entry - sl);
+  const calculatedPips = Math.round(rawSLDiff / pipSize);
+
+  // Pip check
+  let pipMismatch = false;
+  let pipMismatchMsg = '';
+  if (signalPips !== null) {
+    const diff = Math.abs(calculatedPips - signalPips);
+    const tolerance = Math.max(5, signalPips * 0.05); // 5 pips or 5%, whichever larger
+    if (diff > tolerance) {
+      pipMismatch = true;
+      pipMismatchMsg = `Signal states ${signalPips} pips, but calculation from prices gives ${calculatedPips} pips. Using calculated value for sizing.`;
+    }
+  }
+
+  // Use calculated pips for sizing (more reliable)
+  const slPips = calculatedPips;
+
+  // Dollar risk
+  const riskAmount = (riskPct / 100) * accountBalance;
+
+  // Lot size = riskAmount / (slPips * pipValuePerLot)
+  const rawLots = riskAmount / (slPips * pipValuePerLot);
+  const lotSize = parseFloat(rawLots.toFixed(2));
+
+  // TP metrics
+  const tpData = [];
+  const tps = [tp1, tp2, tp3];
+  const labels = ['TP1', 'TP2', 'TP3'];
+
+  tps.forEach((tp, i) => {
+    if (!tp) return;
+    const tpPips = Math.round(Math.abs(tp - entry) / pipSize);
+    const tpGainUSD = tpPips * pipValuePerLot * lotSize;
+    const rr = tpPips / slPips;
+    tpData.push({
+      label: labels[i],
+      price: tp,
+      tpPips,
+      gainUSD: tpGainUSD,
+      rr: parseFloat(rr.toFixed(2)),
+    });
+  });
+
+  return {
+    lotSize,
+    riskAmount: parseFloat(riskAmount.toFixed(2)),
+    slPips,
+    signalPips,
+    pipMismatch,
+    pipMismatchMsg,
+    pipValuePerLot,
+    instrType: info.type,
+    tpData,
+  };
+}
+
+// ── UI Logic ────────────────────────────────────────────────────────
+const gearBtn = document.getElementById('gearBtn');
+const settingsPanel = document.getElementById('settingsPanel');
+const riskPctInput = document.getElementById('riskPct');
+const accountInput = document.getElementById('accountBalance');
+const riskBadge = document.getElementById('riskBadge');
+const signalInput = document.getElementById('signalInput');
+const parseBtn = document.getElementById('parseBtn');
+const clearBtn = document.getElementById('clearBtn');
+const errorBanner = document.getElementById('errorBanner');
+const errorMsg = document.getElementById('errorMsg');
+const parsedCard = document.getElementById('parsedCard');
+const resultsCard = document.getElementById('resultsCard');
+const pipWarning = document.getElementById('pipWarning');
+
+gearBtn.addEventListener('click', () => {
+  settingsPanel.classList.toggle('open');
+});
+
+riskPctInput.addEventListener('input', () => {
+  riskBadge.textContent = `${riskPctInput.value}% risk`;
+});
+
+function showError(msg) {
+  errorBanner.classList.add('show');
+  errorMsg.textContent = msg;
+  parsedCard.classList.remove('show');
+  resultsCard.classList.remove('show');
+}
+
+function hideError() {
+  errorBanner.classList.remove('show');
+}
+
+function fmt(n, decimals = 2) {
+  return n.toFixed(decimals).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+}
+
+function getRRClass(rr) {
+  if (rr < 1) return 'rr-low';
+  if (rr < 2) return 'rr-mid';
+  return 'rr-high';
+}
+
+function instrTypeLabel(t) {
+  const map = {
+    metal: 'Metal (XAU/XAG)',
+    forex_usd_quote: 'Forex (USD quote)',
+    forex_jpy: 'Forex (JPY pair)',
+    forex_cad_quote: 'Forex (CAD quote)',
+    forex_chf_quote: 'Forex (CHF quote)',
+    forex_cross: 'Forex (Cross)',
+    index: 'Index / CFD',
+    crypto: 'Crypto',
+    commodity: 'Commodity',
+  };
+  return map[t] || t;
+}
+
+parseBtn.addEventListener('click', () => {
+  hideError();
+
+  const rawSignal = signalInput.value;
+  const balance = parseFloat(accountInput.value);
+  const riskPct = parseFloat(riskPctInput.value);
+
+  if (!balance || balance <= 0) {
+    showError('Please enter your account balance before calculating.');
+    return;
+  }
+  if (!riskPct || riskPct <= 0) {
+    showError('Risk % must be greater than 0.');
+    return;
+  }
+
+  let parsed;
+  try {
+    parsed = parseSignal(rawSignal);
+  } catch (e) {
+    showError(e.message);
+    return;
+  }
+
+  // Populate parsed card
+  document.getElementById('displayInstrument').textContent = parsed.instrument;
+  const dirEl = document.getElementById('displayDirection');
+  dirEl.textContent = parsed.direction;
+  dirEl.className = 'direction-badge ' + (parsed.direction === 'BUY' ? 'buy' : 'sell');
+  document.getElementById('displayEntry').textContent = parsed.entry;
+  document.getElementById('displaySL').textContent = parsed.sl;
+  document.getElementById('displayTP1').textContent = parsed.tp1 ?? '—';
+  document.getElementById('displayTP2').textContent = parsed.tp2 ?? '—';
+  document.getElementById('displayTP3').textContent = parsed.tp3 ?? '—';
+
+  // Calculate
+  let result;
+  try {
+    result = calculate(parsed, balance, riskPct);
+  } catch (e) {
+    showError('Calculation error: ' + e.message);
+    return;
+  }
+
+  // Pip warning
+  if (result.pipMismatch) {
+    pipWarning.classList.add('show');
+    document.getElementById('pipWarningMsg').textContent = result.pipMismatchMsg;
+  } else {
+    pipWarning.classList.remove('show');
+  }
+
+  parsedCard.classList.add('show');
+
+  // Results
+  document.getElementById('lotSize').textContent = fmt(result.lotSize, 2);
+  document.getElementById('riskAmount').textContent = '$' + fmt(result.riskAmount, 2);
+
+  // TP table
+  const tbody = document.getElementById('tpTableBody');
+  tbody.innerHTML = '';
+  const dotClasses = ['tp1', 'tp2', 'tp3'];
+  result.tpData.forEach((tp, i) => {
+    const tr = document.createElement('tr');
+    const rrClass = getRRClass(tp.rr);
+    tr.innerHTML = `
+      <td><span class="tp-label"><span class="tp-dot ${dotClasses[i]}"></span>${tp.label}</span></td>
+      <td class="gain-muted">${tp.price}</td>
+      <td class="gain-positive">+$${fmt(tp.gainUSD, 2)}</td>
+      <td><span class="rr-pill ${rrClass}">1:${fmt(tp.rr, 2)}</span></td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  // Pip info row
+  document.getElementById('pipCalc').innerHTML = `<span class="${result.pipMismatch ? 'pip-mismatch' : 'pip-match'}">${result.slPips}</span>`;
+  document.getElementById('pipSignal').textContent = result.signalPips !== null ? result.signalPips : 'N/A';
+  document.getElementById('pipValue').textContent = '$' + fmt(result.pipValuePerLot, 2) + '/lot';
+  document.getElementById('instrType').textContent = instrTypeLabel(result.instrType);
+
+  resultsCard.classList.add('show');
+
+  // Scroll to results
+  setTimeout(() => {
+    resultsCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }, 100);
+});
+
+clearBtn.addEventListener('click', () => {
+  signalInput.value = '';
+  hideError();
+  parsedCard.classList.remove('show');
+  resultsCard.classList.remove('show');
+  pipWarning.classList.remove('show');
+});
+</script>
+</body>
+</html>
