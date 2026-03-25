@@ -1,311 +1,3 @@
-
-Forex Position Sizing Calculator
-/
-Help to design a mobile-responsive, simple web application that calculates forex position sizing when certain trade parameters are input to the app.
-
-The objective of this app is to free up the need for the user to manually calculate relevant position size with respect to risk each time he/she needs to take a trade. As entering or exiting a trade is highly time sensitive, it would be very helpful to cut down the time it takes to prepare to enter a trade. 
-
-For the MVP version of this app, the user will be working off signals. The format of the signals will be as follows:
-
-SIGNAL ALERT
-SELL XAUUSD 4495.3
-TP1: 4493.3
-TP2: 4490.3
-TP3: 4477.3
-SL: 4513.3 (1800 pips)
-
-The user will be able to copy and paste the signal and the following information would be captured automatically:
-* whether it is a Long/Short position (Buy or Sell)
-* the instrument pair to be traded (XAUUSD in this example)
-* the entry price (immediately after the instrument pair)
-* 3 take profit scenarios with TP prices (TP1, TP2, TP3)
-* Stop loss level (SL)
-
-Based on the information provided, we need to calculate the relevant position size to place to a trade, given a fixed risk per account balance (for example, 1% risk on account balance) - the fixed risk should be first defaulted to 1% and does not need to be repeatedly input on every trade, but it could be configurable somewhere to change the risk percentage should the user need to.
-
-The calculation should also output certain metrics for the user to evaluate, such as the potential gains from each TP level, and risk-reward ratio of each TP with respect to the stop loss.
-
-Is the information provided enough, please clarify all doubts you have before we start to commit to a design.
-
-Show more
-11:22 AM
-Great concept! Before diving into the design, here are my clarifying questions:
-
-A few more things I want to nail down before we start building:
-
-These answers will help me design the right calculation logic and UX flow. Once I have your responses, I'll get straight into building the app — no further back-and-forth needed.
-
-Q: How is pip value calculated for position sizing? Different instruments have different pip values (e.g. XAUUSD = $0.01 per pip per lot). Should the app handle multiple instruments automatically, or will you mainly trade XAUUSD?
-A: Both forex pairs and metals/commodities
-
-Q: What is your account currency? This affects how P&L and risk amounts are displayed.
-A: USD
-
-Q: For position sizing across multiple TPs — how should lot size be split? (e.g. if TP1/TP2/TP3 are all targets, do you size for the full position risking SL, or split lots across TPs?)
-A: Full position sized to SL risk, TPs are just exit targets
-
-Show more
-11:23 AM
-Two last questions and then we build!
-
-Q: Where is the account balance stored?
-A: User types it in each session
-
-Q: The signal shows '1800 pips' next to the SL — should the app trust that pip count, or independently calculate it from entry vs SL price?
-A: Show both and flag if they differ
-
-11:24 AM
-Perfect — I have everything I need. Let me build this now.
-
-
-Viewed a file, created a file, read a file
-Viewed a file, created a file, read a file
-Here's your FX/SIZER app — a single HTML file you can open in any mobile or desktop browser with no installation needed.
-
-Here's what's packed in:
-
-Signal Parsing
-
-Paste any signal in the format you described — it auto-extracts direction, instrument, entry, TP1/TP2/TP3, and SL
-Tolerant parser (handles spaces, colons, caps variations)
-Position Sizing Logic
-
-Full position sized to SL risk (TPs are exit targets only)
-Formula: Lot Size = (Balance × Risk%) ÷ (SL pips × Pip value/lot)
-Pip value is instrument-aware — XAUUSD, forex pairs, JPY pairs, indices, oil, crypto all handled differently
-Pip Mismatch Detection
-
-Independently calculates pips from entry vs SL price
-Compares against signal's stated pip count (e.g. "1800 pips")
-Shows a yellow warning and flags the discrepancy if they differ by >5% — sizing always uses the calculated value
-Output Metrics
-
-Lot size hero display + max USD risk
-TP table: price, potential gain in USD, and R:R ratio per TP (colour-coded: yellow <1:1, green ≥1:1, bright green ≥1:2)
-Footer row: calculated vs signal pips, pip value/lot, instrument type
-Settings
-
-⚙ gear button reveals risk % (default 1%, adjustable)
-Account balance typed per session as requested
-Forex sizer
-Code · HTML 
-very good, now help me to push this to my github repository
-https://github.com/ericbclim/fx-position-size
-
-i believe i have connected the github to claude app already
-
-11:35 AM
-Let me check what GitHub tools are available to me.
-
-
-Check available MCP tools / environment
-Check available MCP tools / environment
-Unfortunately, I don't see a GitHub MCP connection available in my current environment — even though you may have connected it in the Claude app settings, it doesn't appear to be active in this session.
-
-Here are two easy ways to push the file yourself:
-
-Option 1 — GitHub Web UI (easiest, no terminal needed)
-
-Go to github.com/ericbclim/fx-position-size
-Click Add file → Upload files
-Drag and drop the downloaded forex-sizer.html file
-Write a commit message (e.g. Add FX position sizer MVP) and click Commit changes
-Option 2 — Git CLI (if you have Git installed)
-
-bash
-git clone https://github.com/ericbclim/fx-position-size.git
-cd fx-position-size
-# copy forex-sizer.html into this folder
-git add forex-sizer.html
-git commit -m "Add FX position sizer MVP"
-git push origin main
-To re-enable the GitHub MCP connection so I can push directly next time:
-
-Go to Claude.ai → Settings → Integrations (or the MCP/Connections section)
-Make sure the GitHub integration is toggled on and authorized
-Start a new conversation — it should then be available to me
-i have gone with option 1 and manually uploaded the forex-sizer.html file into my github, now i need to publish it somewhere so that i can access it online, help me to do this
-
-11:40 AM
-The easiest way to publish it is GitHub Pages — it's free, built into your repo, and will give you a public URL like https://ericbclim.github.io/fx-position-size/.
-
-Here's how to enable it in about 1 minute:
-
-Go to your repo: github.com/ericbclim/fx-position-size
-Click Settings (top tab row)
-In the left sidebar, click Pages
-Under Source, select Deploy from a branch
-Set branch to main and folder to / (root), then click Save
-GitHub will build and deploy it — takes about 1–2 minutes. Your app will then be live at:
-
-https://ericbclim.github.io/fx-position-size/forex-sizer.html
-
-One tip: if you rename forex-sizer.html to index.html in your repo, the URL becomes cleaner:
-
-https://ericbclim.github.io/fx-position-size/
-
-You can rename it directly on GitHub by clicking the file → the pencil ✏️ edit icon → then changing the filename at the top before committing.
-
-how do i rename the file on github?
-
-11:45 AM
-Here's how to rename it directly on GitHub:
-
-Go to your repo and click on forex-sizer.html to open it
-Click the pencil ✏️ icon (Edit this file) in the top right of the file view
-At the top of the editor, you'll see the filename field — click on it and change forex-sizer.html to index.html
-Scroll down and click Commit changes
-That's it! Your app will then be accessible at the clean URL:
-
-https://ericbclim.github.io/fx-position-size/
-
-can you design a toggle to switch between "dark" and "light" mode?
-
-5:15 PM
-
-Edited 7 files, viewed a file, read a file
-Edited 7 files, viewed a file, read a file
-Done! The toggle sits in the header next to the ⚙ gear button. Here's what was added:
-
-🌙 → ☀️ pill toggle — slides smoothly between dark and light mode
-Light mode palette — clean off-white background (
-#f0f2f5), white cards, dark text, and slightly deeper accent/red/yellow colours for proper contrast on light backgrounds
-Smooth transitions — all surfaces, borders, and text colours fade over 0.25s when switching themes
-No page flicker — theme swap is instant via a CSS class on <html>
-Just upload this updated forex-sizer.html to your GitHub repo (replacing the old file) and it'll be live on GitHub Pages within a minute.
-
-Forex sizer
-Code · HTML 
-can you include a button to paste instead of having the user to have to click into the text box, and select to paste? It would be more efficient to have a button to let the user paste whatever is currently in his clipboard cache.
-
-5:17 PM
-
-Edited 5 files, read a file
-Edited 5 files, read a file
-Done! The 📋 PASTE button now sits to the left of CALCULATE. Here's how it behaves:
-
-Tap PASTE → reads directly from your clipboard and fills the text box instantly
-✓ PASTED (green flash) on success, ✗ ALLOW ACCESS (red flash) if clipboard permission is denied
-📋 EMPTY (red flash) if your clipboard is empty
-On mobile browsers, the first tap may trigger a one-time system permission prompt — after allowing it once, it works silently every time
-The intended flow is now just: copy signal → tap PASTE → tap CALCULATE. Three taps, done.
-
-Forex sizer
-Code · HTML 
-Uncaught Error: Uncaught SyntaxError: Illegal return statement
-5:18 PM
-
-Viewed 3 files
-Viewed 3 files
-Found it — the parseBtn.addEventListener('click', () => { opening line got accidentally dropped during the edit, leaving the function body floating loose (hence "Illegal return statement"). Let me fix it:
-
-
-Edited a file, read a file
-Edited a file, read a file
-Fixed. The parseBtn event listener's opening line had been accidentally dropped during the paste button edit, leaving all those return statements outside any function — which is what caused the syntax error. All good now, upload this to GitHub and it should work cleanly.
-
-Forex sizer
-Code · HTML 
-why does it say "Allow Access" when i click on the paste button?
-
-5:19 PM
-This is a browser clipboard permission issue, not a bug in the code. Here's what's happening:
-
-The navigator.clipboard.readText() API requires the page to be served over HTTPS and have explicit clipboard-read permission granted by the browser. There are two likely causes:
-
-Most likely: You're opening the file locally If you're testing by double-clicking the HTML file (file://...), browsers block clipboard access entirely for local files. It will only work when accessed via a proper URL like your GitHub Pages link (https://ericbclim.github.io/...).
-
-Less likely: Browser blocked the permission Some browsers (especially on first use) show a permission prompt — if it was dismissed or denied, it stays blocked.
-
-To fix for local testing, try one of these:
-
-Test via your live GitHub Pages URL instead of the local file
-Or in Chrome, go to chrome://settings/content/clipboard and ensure it's not blocked
-To fix a denied permission on the live site:
-
-Click the 🔒 padlock in the address bar
-Find Clipboard → set it to Allow
-Refresh the page
-Once you're on the GitHub Pages HTTPS URL and clipboard access is allowed, the paste button will work silently with a single tap every time.
-
-can you rename the file to index.html and help me to push to github
-
-5:20 PM
-Let me check what tools are available first.
-
-
-Ran a command, read a file
-Ran a command, read a file
-The file is renamed to index.html. As for pushing to GitHub — unfortunately the GitHub integration still isn't visible to me in this session, so you'll need to do it manually. It's quick though:
-
-Go to github.com/ericbclim/fx-position-size
-Click Add file → Upload files
-Upload the index.html file you just downloaded
-Delete the old forex-sizer.html — click on it → the trash 🗑 icon → Commit changes
-Your app will be live at https://ericbclim.github.io/fx-position-size/
-Index
-Code · HTML 
-teach me how to manually deploy this file to github, i already have an existing index.html in the project repository on github, i want to upload a new version while retaining the old version in history
-
-5:22 PM
-Here's the cleanest way to do it directly on GitHub — no terminal needed:
-
-Step 1 — Open the existing file Go to your repo and click on index.html to open it.
-
-Step 2 — Edit/Replace the file Click the pencil ✏️ icon (top right of the file view) to open the editor.
-
-Step 3 — Replace the content
-
-Press Ctrl+A (or Cmd+A on Mac) to select all the existing code
-Delete it
-Open your new index.html in a text editor, select all, copy, and paste it into the GitHub editor
-Step 4 — Commit the change Scroll down to the "Commit changes" section:
-
-Add a meaningful message in the first field, e.g. Add paste button and dark/light mode toggle
-Leave "Commit directly to the main branch" selected
-Click Commit changes
-That's it. GitHub automatically retains the full history — to verify, you can click History (top right of the file view) at any time and you'll see every previous version with the ability to restore any of them.
-
-make the textbox longer to accomodate for the entire signal length
-
-5:26 PM
-
-Edited a file, read a file
-Edited a file, read a file
-Done — the text box is now taller so the full 6-line signal fits without scrolling. Upload this to GitHub using the same steps as before.
-
-Index
-Code · HTML 
-there is still a scrollbar  at the right, which is not as clean. Increase the textarea further so that the scrollbar does not appear
-
-5:27 PM
-
-Edited 2 files, read a file
-Edited 2 files, read a file
-Done — increased the height to 230px and also set overflow: hidden on the textarea so the scrollbar will never appear regardless of content length.
-
-Index
-Code · HTML 
-that's a bit too long, decrease a little bit
-
-5:28 PM
-
-Edited a file, read a file
-Edited a file, read a file
-Reduced to 200px. Upload and let me know if that feels right or needs another nudge.
-
-Index
-Code · HTML 
-
-
-
-
-
-
-Claude is AI and can make mistakes. Please double-check responses.
-Index · HTML
-Copy
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -337,7 +29,7 @@ Copy
     --radius-sm: 6px;
     --header-bg: rgba(10,12,15,0.92);
   }
- 
+
   :root.light {
     --bg: #f0f2f5;
     --surface: #ffffff;
@@ -356,15 +48,15 @@ Copy
     --text-mid: #4a5568;
     --header-bg: rgba(240,242,245,0.92);
   }
- 
+
   * { box-sizing: border-box; margin: 0; padding: 0; }
- 
+
   html, body, header, .settings-panel, .account-row, .signal-area,
   .parsed-card, .results-card, .error-banner, .pip-warning,
   .gear-btn, .theme-toggle, .btn-clear, .settings-row input[type="number"] {
     transition: background 0.25s ease, border-color 0.25s ease, color 0.2s ease;
   }
- 
+
   body {
     background: var(--bg);
     color: var(--text);
@@ -373,7 +65,7 @@ Copy
     padding: 0;
     -webkit-font-smoothing: antialiased;
   }
- 
+
   /* ── Header ── */
   header {
     padding: 18px 20px 14px;
@@ -408,7 +100,7 @@ Copy
     transition: all 0.15s;
   }
   .gear-btn:hover { border-color: var(--accent); color: var(--accent); }
- 
+
   /* ── Theme Toggle ── */
   .theme-toggle {
     background: var(--surface2);
@@ -445,10 +137,10 @@ Copy
   .light .toggle-thumb {
     left: 31px;
   }
- 
+
   /* ── Main Layout ── */
   main { padding: 16px; max-width: 520px; margin: 0 auto; }
- 
+
   /* ── Settings Panel ── */
   .settings-panel {
     background: var(--surface);
@@ -495,7 +187,7 @@ Copy
   }
   .settings-row input[type="number"]:focus { border-color: var(--accent); }
   .pct-label { font-family: var(--mono); font-size: 12px; color: var(--text-muted); }
- 
+
   /* ── Account Row ── */
   .account-row {
     background: var(--surface);
@@ -550,7 +242,7 @@ Copy
     white-space: nowrap;
     cursor: pointer;
   }
- 
+
   /* ── Signal Paste Area ── */
   .section-label {
     font-family: var(--mono);
@@ -569,7 +261,7 @@ Copy
     height: 1px;
     background: var(--border);
   }
- 
+
   .signal-area {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -645,7 +337,7 @@ Copy
     transition: all 0.15s;
   }
   .btn-clear:hover { border-color: var(--red); color: var(--red); }
- 
+
   /* ── Parsed Signal Summary ── */
   .parsed-card {
     background: var(--surface);
@@ -658,7 +350,7 @@ Copy
   }
   .parsed-card.show { display: block; }
   @keyframes fadeIn { from { opacity:0; transform:translateY(4px); } to { opacity:1; transform:translateY(0); } }
- 
+
   .parsed-header {
     display: flex;
     align-items: center;
@@ -691,7 +383,7 @@ Copy
     color: var(--red);
     border: 1px solid rgba(255,77,109,0.3);
   }
- 
+
   .price-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -724,7 +416,7 @@ Copy
   .price-value.entry { color: var(--yellow); }
   .price-value.tp { color: var(--accent); }
   .price-value.sl { color: var(--red); }
- 
+
   /* ── Pip Warning ── */
   .pip-warning {
     margin: 0 14px 12px;
@@ -740,7 +432,7 @@ Copy
   }
   .pip-warning.show { display: flex; }
   .pip-warning .warn-icon { font-size: 13px; flex-shrink: 0; margin-top: 1px; }
- 
+
   /* ── Results Card ── */
   .results-card {
     background: var(--surface);
@@ -752,7 +444,7 @@ Copy
     animation: fadeIn 0.2s ease;
   }
   .results-card.show { display: block; }
- 
+
   .results-header {
     padding: 12px 14px;
     border-bottom: 1px solid var(--border);
@@ -767,7 +459,7 @@ Copy
     color: var(--text-muted);
     text-transform: uppercase;
   }
- 
+
   /* Lot Size Hero */
   .lot-hero {
     padding: 18px 14px 14px;
@@ -806,7 +498,7 @@ Copy
     color: var(--text-muted);
     margin-top: 2px;
   }
- 
+
   /* TP Table */
   .tp-table { width: 100%; border-collapse: collapse; }
   .tp-table th {
@@ -830,7 +522,7 @@ Copy
   }
   .tp-table tr:last-child td { border-bottom: none; }
   .tp-table td:not(:first-child) { text-align: right; }
- 
+
   .tp-label {
     display: inline-flex;
     align-items: center;
@@ -846,7 +538,7 @@ Copy
   .tp-dot.tp1 { opacity: 1; }
   .tp-dot.tp2 { opacity: 0.7; }
   .tp-dot.tp3 { opacity: 0.45; }
- 
+
   .rr-pill {
     display: inline-block;
     padding: 2px 7px;
@@ -857,10 +549,10 @@ Copy
   .rr-low { background: var(--yellow-dim); color: var(--yellow); }
   .rr-mid { background: var(--accent-dim); color: var(--accent); }
   .rr-high { background: rgba(0,229,160,0.22); color: var(--accent); }
- 
+
   .gain-positive { color: var(--accent); }
   .gain-muted { color: var(--text-mid); }
- 
+
   /* ── Error State ── */
   .error-banner {
     background: var(--red-dim);
@@ -875,7 +567,7 @@ Copy
     gap: 8px;
   }
   .error-banner.show { display: flex; }
- 
+
   /* ── Pip Info Row ── */
   .pip-info-row {
     padding: 10px 14px;
@@ -902,15 +594,15 @@ Copy
   }
   .pip-match { color: var(--accent); }
   .pip-mismatch { color: var(--yellow); }
- 
+
   /* ── Scrollbar ── */
   ::-webkit-scrollbar { width: 4px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 4px; }
- 
+
   /* ── Safe area for mobile ── */
   .bottom-pad { height: 40px; }
- 
+
   /* ── Input number spinner hide ── */
   input[type=number]::-webkit-inner-spin-button,
   input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; }
@@ -918,7 +610,7 @@ Copy
 </style>
 </head>
 <body>
- 
+
 <header>
   <div class="logo">FX<span>/</span>SIZER</div>
   <div class="header-right">
@@ -932,9 +624,9 @@ Copy
     <button class="gear-btn" id="gearBtn" title="Settings">⚙</button>
   </div>
 </header>
- 
+
 <main>
- 
+
   <!-- Settings Panel -->
   <div class="settings-panel" id="settingsPanel">
     <div class="settings-title">Risk Settings</div>
@@ -944,7 +636,7 @@ Copy
       <span class="pct-label">%</span>
     </div>
   </div>
- 
+
   <!-- Account Balance -->
   <div class="account-row">
     <label>Account Balance</label>
@@ -954,12 +646,12 @@ Copy
     </div>
     <div class="risk-badge" id="riskBadge">1% risk</div>
   </div>
- 
+
   <!-- Signal Input -->
   <div class="section-label">Signal Input</div>
   <div class="signal-area">
     <textarea id="signalInput" placeholder="Paste your signal here…
- 
+
 SIGNAL ALERT
 SELL XAUUSD 4495.3
 TP1: 4493.3
@@ -972,13 +664,13 @@ SL: 4513.3 (1800 pips)"></textarea>
       <button class="btn-clear" id="clearBtn">CLEAR</button>
     </div>
   </div>
- 
+
   <!-- Error Banner -->
   <div class="error-banner" id="errorBanner">
     <span>⚠</span>
     <span id="errorMsg">Could not parse signal. Please check format.</span>
   </div>
- 
+
   <!-- Parsed Signal Card -->
   <div class="parsed-card" id="parsedCard">
     <div class="parsed-header">
@@ -1007,14 +699,14 @@ SL: 4513.3 (1800 pips)"></textarea>
         <div class="price-value tp" id="displayTP3">—</div>
       </div>
     </div>
- 
+
     <!-- Pip warning -->
     <div class="pip-warning" id="pipWarning">
       <span class="warn-icon">⚠</span>
       <span id="pipWarningMsg"></span>
     </div>
   </div>
- 
+
   <!-- Results Card -->
   <div class="results-card" id="resultsCard">
     <div class="results-header">
@@ -1028,7 +720,7 @@ SL: 4513.3 (1800 pips)"></textarea>
         <div class="risk-label">max risk (USD)</div>
       </div>
     </div>
- 
+
     <table class="tp-table">
       <thead>
         <tr>
@@ -1040,7 +732,7 @@ SL: 4513.3 (1800 pips)"></textarea>
       </thead>
       <tbody id="tpTableBody"></tbody>
     </table>
- 
+
     <div class="pip-info-row">
       <div class="pip-info-item">
         <span class="pip-info-label">SL Pips (calc)</span>
@@ -1060,10 +752,10 @@ SL: 4513.3 (1800 pips)"></textarea>
       </div>
     </div>
   </div>
- 
+
   <div class="bottom-pad"></div>
 </main>
- 
+
 <script>
 // ── Instrument Database ──────────────────────────────────────────────
 // pipSize: the minimum price movement counted as 1 pip
@@ -1075,13 +767,13 @@ const INSTRUMENTS = {
   XAUUSD: { type: 'metal',   pipSize: 0.01,   pipValuePerLot: 1.00   }, // Gold: pip=$0.01, 1lot=100oz => $1/pip
   XAGUSD: { type: 'metal',   pipSize: 0.001,  pipValuePerLot: 5.00   }, // Silver: approx
   XPTUSD: { type: 'metal',   pipSize: 0.01,   pipValuePerLot: 1.00   },
- 
+
   // USD-quoted forex (1 pip = 0.0001, 1 lot = 100k units)
   EURUSD: { type: 'forex_usd_quote', pipSize: 0.0001, pipValuePerLot: 10 },
   GBPUSD: { type: 'forex_usd_quote', pipSize: 0.0001, pipValuePerLot: 10 },
   AUDUSD: { type: 'forex_usd_quote', pipSize: 0.0001, pipValuePerLot: 10 },
   NZDUSD: { type: 'forex_usd_quote', pipSize: 0.0001, pipValuePerLot: 10 },
- 
+
   // JPY pairs (pip = 0.01)
   USDJPY: { type: 'forex_jpy', pipSize: 0.01, pipValuePerLot: null }, // ~$6.50–$9 depending on rate; calculated dynamically via approximate
   EURJPY: { type: 'forex_jpy', pipSize: 0.01, pipValuePerLot: null },
@@ -1090,11 +782,11 @@ const INSTRUMENTS = {
   CADJPY: { type: 'forex_jpy', pipSize: 0.01, pipValuePerLot: null },
   CHFJPY: { type: 'forex_jpy', pipSize: 0.01, pipValuePerLot: null },
   NZDJPY: { type: 'forex_jpy', pipSize: 0.01, pipValuePerLot: null },
- 
+
   // USD-base pairs (pip value in quote currency, need conversion)
   USDCAD: { type: 'forex_cad_quote', pipSize: 0.0001, pipValuePerLot: null },
   USDCHF: { type: 'forex_chf_quote', pipSize: 0.0001, pipValuePerLot: null },
- 
+
   // Cross pairs (approximated via USD equivalent)
   EURGBP: { type: 'forex_cross', pipSize: 0.0001, pipValuePerLot: 13 }, // approx
   EURAUD: { type: 'forex_cross', pipSize: 0.0001, pipValuePerLot: 6.5 },
@@ -1102,32 +794,32 @@ const INSTRUMENTS = {
   GBPCAD: { type: 'forex_cross', pipSize: 0.0001, pipValuePerLot: 7.5 },
   AUDCAD: { type: 'forex_cross', pipSize: 0.0001, pipValuePerLot: 7.3 },
   AUDCHF: { type: 'forex_cross', pipSize: 0.0001, pipValuePerLot: 7.0 },
- 
+
   // Indices (point-based, treated like pip=1)
   US30:   { type: 'index', pipSize: 1, pipValuePerLot: 1 },
   US500:  { type: 'index', pipSize: 0.1, pipValuePerLot: 1 },
   NAS100: { type: 'index', pipSize: 0.1, pipValuePerLot: 1 },
   GER40:  { type: 'index', pipSize: 1, pipValuePerLot: 1 },
- 
+
   // Crypto (approximate)
   BTCUSD: { type: 'crypto', pipSize: 1, pipValuePerLot: 1 },
   ETHUSD: { type: 'crypto', pipSize: 0.01, pipValuePerLot: 1 },
- 
+
   // Oil
   USOIL:  { type: 'commodity', pipSize: 0.01, pipValuePerLot: 10 },
   UKOIL:  { type: 'commodity', pipSize: 0.01, pipValuePerLot: 10 },
 };
- 
+
 function getInstrumentInfo(symbol) {
   const upper = symbol.toUpperCase();
   if (INSTRUMENTS[upper]) return { ...INSTRUMENTS[upper], symbol: upper, known: true };
- 
+
   // Fallback: guess from suffix
   if (upper.endsWith('USD')) return { type: 'forex_usd_quote', pipSize: 0.0001, pipValuePerLot: 10, symbol: upper, known: false };
   if (upper.endsWith('JPY')) return { type: 'forex_jpy',       pipSize: 0.01,   pipValuePerLot: 7,  symbol: upper, known: false };
   return { type: 'forex_cross', pipSize: 0.0001, pipValuePerLot: 10, symbol: upper, known: false };
 }
- 
+
 function getPipValuePerLot(info, entryPrice) {
   if (info.pipValuePerLot !== null && info.pipValuePerLot !== undefined) return info.pipValuePerLot;
   // JPY pairs: pip value = (pip_size * lot_size) / rate
@@ -1142,55 +834,55 @@ function getPipValuePerLot(info, entryPrice) {
   }
   return 10; // safe fallback
 }
- 
+
 // ── Signal Parser ──────────────────────────────────────────────────
 function parseSignal(raw) {
   const text = raw.trim();
   if (!text) throw new Error('No signal text provided.');
- 
+
   // Direction: BUY or SELL
   const dirMatch = text.match(/\b(BUY|SELL)\b/i);
   if (!dirMatch) throw new Error('Could not find BUY or SELL in signal.');
   const direction = dirMatch[1].toUpperCase();
- 
+
   // Instrument & Entry: e.g. "SELL XAUUSD 4495.3" or "BUY EURUSD 1.08500"
   const instrMatch = text.match(/(?:BUY|SELL)\s+([A-Z0-9]+)\s+([\d.]+)/i);
   if (!instrMatch) throw new Error('Could not parse instrument and entry price.');
   const instrument = instrMatch[1].toUpperCase();
   const entry = parseFloat(instrMatch[2]);
- 
+
   // TPs
   const tp1Match = text.match(/TP1\s*[:=]?\s*([\d.]+)/i);
   const tp2Match = text.match(/TP2\s*[:=]?\s*([\d.]+)/i);
   const tp3Match = text.match(/TP3\s*[:=]?\s*([\d.]+)/i);
- 
+
   const tp1 = tp1Match ? parseFloat(tp1Match[1]) : null;
   const tp2 = tp2Match ? parseFloat(tp2Match[1]) : null;
   const tp3 = tp3Match ? parseFloat(tp3Match[1]) : null;
- 
+
   if (!tp1 && !tp2 && !tp3) throw new Error('No take profit levels found (TP1/TP2/TP3).');
- 
+
   // SL price and optional pip count in parentheses
   const slMatch = text.match(/SL\s*[:=]?\s*([\d.]+)(?:\s*\((\d+)\s*pips?\))?/i);
   if (!slMatch) throw new Error('Could not parse Stop Loss (SL).');
   const sl = parseFloat(slMatch[1]);
   const signalPips = slMatch[2] ? parseInt(slMatch[2]) : null;
- 
+
   return { direction, instrument, entry, tp1, tp2, tp3, sl, signalPips };
 }
- 
+
 // ── Position Size Calculator ────────────────────────────────────────
 function calculate(parsed, accountBalance, riskPct) {
   const { direction, instrument, entry, tp1, tp2, tp3, sl, signalPips } = parsed;
- 
+
   const info = getInstrumentInfo(instrument);
   const pipSize = info.pipSize;
   const pipValuePerLot = getPipValuePerLot(info, entry);
- 
+
   // Pip distance from entry to SL (always positive)
   const rawSLDiff = Math.abs(entry - sl);
   const calculatedPips = Math.round(rawSLDiff / pipSize);
- 
+
   // Pip check
   let pipMismatch = false;
   let pipMismatchMsg = '';
@@ -1202,22 +894,22 @@ function calculate(parsed, accountBalance, riskPct) {
       pipMismatchMsg = `Signal states ${signalPips} pips, but calculation from prices gives ${calculatedPips} pips. Using calculated value for sizing.`;
     }
   }
- 
+
   // Use calculated pips for sizing (more reliable)
   const slPips = calculatedPips;
- 
+
   // Dollar risk
   const riskAmount = (riskPct / 100) * accountBalance;
- 
+
   // Lot size = riskAmount / (slPips * pipValuePerLot)
   const rawLots = riskAmount / (slPips * pipValuePerLot);
   const lotSize = parseFloat(rawLots.toFixed(2));
- 
+
   // TP metrics
   const tpData = [];
   const tps = [tp1, tp2, tp3];
   const labels = ['TP1', 'TP2', 'TP3'];
- 
+
   tps.forEach((tp, i) => {
     if (!tp) return;
     const tpPips = Math.round(Math.abs(tp - entry) / pipSize);
@@ -1231,7 +923,7 @@ function calculate(parsed, accountBalance, riskPct) {
       rr: parseFloat(rr.toFixed(2)),
     });
   });
- 
+
   return {
     lotSize,
     riskAmount: parseFloat(riskAmount.toFixed(2)),
@@ -1244,7 +936,7 @@ function calculate(parsed, accountBalance, riskPct) {
     tpData,
   };
 }
- 
+
 // ── UI Logic ────────────────────────────────────────────────────────
 const gearBtn = document.getElementById('gearBtn');
 const themeToggle = document.getElementById('themeToggle');
@@ -1262,41 +954,41 @@ const errorMsg = document.getElementById('errorMsg');
 const parsedCard = document.getElementById('parsedCard');
 const resultsCard = document.getElementById('resultsCard');
 const pipWarning = document.getElementById('pipWarning');
- 
+
 gearBtn.addEventListener('click', () => {
   settingsPanel.classList.toggle('open');
 });
- 
+
 themeToggle.addEventListener('click', () => {
   const isLight = document.documentElement.classList.toggle('light');
   toggleThumb.textContent = isLight ? '☀️' : '🌙';
 });
- 
+
 riskPctInput.addEventListener('input', () => {
   riskBadge.textContent = `${riskPctInput.value}% risk`;
 });
- 
+
 function showError(msg) {
   errorBanner.classList.add('show');
   errorMsg.textContent = msg;
   parsedCard.classList.remove('show');
   resultsCard.classList.remove('show');
 }
- 
+
 function hideError() {
   errorBanner.classList.remove('show');
 }
- 
+
 function fmt(n, decimals = 2) {
   return n.toFixed(decimals).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 }
- 
+
 function getRRClass(rr) {
   if (rr < 1) return 'rr-low';
   if (rr < 2) return 'rr-mid';
   return 'rr-high';
 }
- 
+
 function instrTypeLabel(t) {
   const map = {
     metal: 'Metal (XAU/XAG)',
@@ -1311,7 +1003,7 @@ function instrTypeLabel(t) {
   };
   return map[t] || t;
 }
- 
+
 pasteBtn.addEventListener('click', async () => {
   try {
     const text = await navigator.clipboard.readText();
@@ -1327,7 +1019,7 @@ pasteBtn.addEventListener('click', async () => {
     if (!ok) setPasteState('error', '✗ ALLOW ACCESS');
   }
 });
- 
+
 function setPasteState(state, label) {
   pasteBtn.textContent = label;
   pasteBtn.classList.add(state);
@@ -1336,15 +1028,15 @@ function setPasteState(state, label) {
     pasteBtn.classList.remove(state);
   }, 1800);
 }
- 
- 
+
+
 parseBtn.addEventListener('click', () => {
   hideError();
- 
+
   const rawSignal = signalInput.value;
   const balance = parseFloat(accountInput.value);
   const riskPct = parseFloat(riskPctInput.value);
- 
+
   if (!balance || balance <= 0) {
     showError('Please enter your account balance before calculating.');
     return;
@@ -1353,7 +1045,7 @@ parseBtn.addEventListener('click', () => {
     showError('Risk % must be greater than 0.');
     return;
   }
- 
+
   let parsed;
   try {
     parsed = parseSignal(rawSignal);
@@ -1361,7 +1053,7 @@ parseBtn.addEventListener('click', () => {
     showError(e.message);
     return;
   }
- 
+
   // Populate parsed card
   document.getElementById('displayInstrument').textContent = parsed.instrument;
   const dirEl = document.getElementById('displayDirection');
@@ -1372,7 +1064,7 @@ parseBtn.addEventListener('click', () => {
   document.getElementById('displayTP1').textContent = parsed.tp1 ?? '—';
   document.getElementById('displayTP2').textContent = parsed.tp2 ?? '—';
   document.getElementById('displayTP3').textContent = parsed.tp3 ?? '—';
- 
+
   // Calculate
   let result;
   try {
@@ -1381,7 +1073,7 @@ parseBtn.addEventListener('click', () => {
     showError('Calculation error: ' + e.message);
     return;
   }
- 
+
   // Pip warning
   if (result.pipMismatch) {
     pipWarning.classList.add('show');
@@ -1389,13 +1081,13 @@ parseBtn.addEventListener('click', () => {
   } else {
     pipWarning.classList.remove('show');
   }
- 
+
   parsedCard.classList.add('show');
- 
+
   // Results
   document.getElementById('lotSize').textContent = fmt(result.lotSize, 2);
   document.getElementById('riskAmount').textContent = '$' + fmt(result.riskAmount, 2);
- 
+
   // TP table
   const tbody = document.getElementById('tpTableBody');
   tbody.innerHTML = '';
@@ -1411,21 +1103,21 @@ parseBtn.addEventListener('click', () => {
     `;
     tbody.appendChild(tr);
   });
- 
+
   // Pip info row
   document.getElementById('pipCalc').innerHTML = `<span class="${result.pipMismatch ? 'pip-mismatch' : 'pip-match'}">${result.slPips}</span>`;
   document.getElementById('pipSignal').textContent = result.signalPips !== null ? result.signalPips : 'N/A';
   document.getElementById('pipValue').textContent = '$' + fmt(result.pipValuePerLot, 2) + '/lot';
   document.getElementById('instrType').textContent = instrTypeLabel(result.instrType);
- 
+
   resultsCard.classList.add('show');
- 
+
   // Scroll to results
   setTimeout(() => {
     resultsCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }, 100);
 });
- 
+
 clearBtn.addEventListener('click', () => {
   signalInput.value = '';
   hideError();
@@ -1436,4 +1128,3 @@ clearBtn.addEventListener('click', () => {
 </script>
 </body>
 </html>
- 
