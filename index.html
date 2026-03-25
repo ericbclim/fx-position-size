@@ -4,6 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FX Sizer — Position Calculator</title>
+<meta name="description" content="Forex position sizing calculator — paste a signal, get your lot size instantly.">
+<meta name="theme-color" content="#0a0c0f" id="themeMetaColor">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="FX Sizer">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -962,7 +970,16 @@ gearBtn.addEventListener('click', () => {
 themeToggle.addEventListener('click', () => {
   const isLight = document.documentElement.classList.toggle('light');
   toggleThumb.textContent = isLight ? '☀️' : '🌙';
+  document.getElementById('themeMetaColor').setAttribute('content', isLight ? '#f0f2f5' : '#0a0c0f');
 });
+
+// ── Register Service Worker ──────────────────────────────────────────
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('service-worker.js')
+      .catch(err => console.log('SW registration failed:', err));
+  });
+}
 
 riskPctInput.addEventListener('input', () => {
   riskBadge.textContent = `${riskPctInput.value}% risk`;

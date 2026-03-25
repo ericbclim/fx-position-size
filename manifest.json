@@ -1,0 +1,25 @@
+{
+  "name": "FX Sizer — Position Calculator",
+  "short_name": "FX Sizer",
+  "description": "Forex position sizing calculator — paste a signal, get your lot size instantly.",
+  "start_url": "/fx-position-size/",
+  "scope": "/fx-position-size/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0a0c0f",
+  "theme_color": "#0a0c0f",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
