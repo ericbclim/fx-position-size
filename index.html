@@ -27,9 +27,35 @@
     --sans: 'DM Sans', sans-serif;
     --radius: 10px;
     --radius-sm: 6px;
+    --header-bg: rgba(10,12,15,0.92);
+  }
+
+  :root.light {
+    --bg: #f0f2f5;
+    --surface: #ffffff;
+    --surface2: #e8ebf0;
+    --border: #d4d9e2;
+    --border-light: #bcc3cf;
+    --accent: #00a873;
+    --accent-dim: rgba(0,168,115,0.10);
+    --accent-dim2: rgba(0,168,115,0.05);
+    --red: #d93256;
+    --red-dim: rgba(217,50,86,0.10);
+    --yellow: #b07d00;
+    --yellow-dim: rgba(176,125,0,0.10);
+    --text: #0f1317;
+    --text-muted: #8a95a3;
+    --text-mid: #4a5568;
+    --header-bg: rgba(240,242,245,0.92);
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body, header, .settings-panel, .account-row, .signal-area,
+  .parsed-card, .results-card, .error-banner, .pip-warning,
+  .gear-btn, .theme-toggle, .btn-clear, .settings-row input[type="number"] {
+    transition: background 0.25s ease, border-color 0.25s ease, color 0.2s ease;
+  }
 
   body {
     background: var(--bg);
@@ -49,7 +75,7 @@
     border-bottom: 1px solid var(--border);
     position: sticky;
     top: 0;
-    background: rgba(10,12,15,0.92);
+    background: var(--header-bg);
     backdrop-filter: blur(12px);
     z-index: 100;
   }
@@ -74,6 +100,43 @@
     transition: all 0.15s;
   }
   .gear-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* ── Theme Toggle ── */
+  .theme-toggle {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    width: 56px; height: 28px;
+    cursor: pointer;
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding: 3px;
+    flex-shrink: 0;
+  }
+  .theme-toggle:hover { border-color: var(--accent); }
+  .toggle-track {
+    width: 100%; height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 5px;
+    font-size: 11px;
+    pointer-events: none;
+  }
+  .toggle-thumb {
+    position: absolute;
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: var(--accent);
+    left: 3px;
+    transition: left 0.22s cubic-bezier(0.4,0,0.2,1), background 0.25s;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px;
+  }
+  .light .toggle-thumb {
+    left: 31px;
+  }
 
   /* ── Main Layout ── */
   main { padding: 16px; max-width: 520px; margin: 0 auto; }
@@ -229,6 +292,22 @@
     padding: 8px 10px;
     border-top: 1px solid var(--border);
   }
+  .btn-paste {
+    background: var(--surface2);
+    color: var(--text-mid);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-family: var(--mono);
+    font-size: 12px;
+    padding: 9px 13px;
+    cursor: pointer;
+    display: flex; align-items: center; gap: 5px;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .btn-paste:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-paste.success { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+  .btn-paste.error   { border-color: var(--red);    color: var(--red);    background: var(--red-dim); }
   .btn-parse {
     flex: 1;
     background: var(--accent);
@@ -534,6 +613,13 @@
 <header>
   <div class="logo">FX<span>/</span>SIZER</div>
   <div class="header-right">
+    <button class="theme-toggle" id="themeToggle" title="Toggle light/dark mode" aria-label="Toggle theme">
+      <div class="toggle-track">
+        <span>🌙</span>
+        <span>☀️</span>
+      </div>
+      <div class="toggle-thumb" id="toggleThumb">🌙</div>
+    </button>
     <button class="gear-btn" id="gearBtn" title="Settings">⚙</button>
   </div>
 </header>
@@ -572,6 +658,7 @@ TP2: 4490.3
 TP3: 4477.3
 SL: 4513.3 (1800 pips)"></textarea>
     <div class="signal-actions">
+      <button class="btn-paste" id="pasteBtn">📋 PASTE</button>
       <button class="btn-parse" id="parseBtn">▶ CALCULATE</button>
       <button class="btn-clear" id="clearBtn">CLEAR</button>
     </div>
@@ -851,12 +938,15 @@ function calculate(parsed, accountBalance, riskPct) {
 
 // ── UI Logic ────────────────────────────────────────────────────────
 const gearBtn = document.getElementById('gearBtn');
+const themeToggle = document.getElementById('themeToggle');
+const toggleThumb = document.getElementById('toggleThumb');
 const settingsPanel = document.getElementById('settingsPanel');
 const riskPctInput = document.getElementById('riskPct');
 const accountInput = document.getElementById('accountBalance');
 const riskBadge = document.getElementById('riskBadge');
 const signalInput = document.getElementById('signalInput');
 const parseBtn = document.getElementById('parseBtn');
+const pasteBtn = document.getElementById('pasteBtn');
 const clearBtn = document.getElementById('clearBtn');
 const errorBanner = document.getElementById('errorBanner');
 const errorMsg = document.getElementById('errorMsg');
@@ -866,6 +956,11 @@ const pipWarning = document.getElementById('pipWarning');
 
 gearBtn.addEventListener('click', () => {
   settingsPanel.classList.toggle('open');
+});
+
+themeToggle.addEventListener('click', () => {
+  const isLight = document.documentElement.classList.toggle('light');
+  toggleThumb.textContent = isLight ? '☀️' : '🌙';
 });
 
 riskPctInput.addEventListener('input', () => {
@@ -907,6 +1002,32 @@ function instrTypeLabel(t) {
   };
   return map[t] || t;
 }
+
+pasteBtn.addEventListener('click', async () => {
+  try {
+    const text = await navigator.clipboard.readText();
+    if (!text.trim()) {
+      setPasteState('error', '📋 EMPTY');
+      return;
+    }
+    signalInput.value = text;
+    setPasteState('success', '✓ PASTED');
+  } catch (e) {
+    signalInput.focus();
+    const ok = document.execCommand('paste');
+    if (!ok) setPasteState('error', '✗ ALLOW ACCESS');
+  }
+});
+
+function setPasteState(state, label) {
+  pasteBtn.textContent = label;
+  pasteBtn.classList.add(state);
+  setTimeout(() => {
+    pasteBtn.textContent = '📋 PASTE';
+    pasteBtn.classList.remove(state);
+  }, 1800);
+}
+
 
 parseBtn.addEventListener('click', () => {
   hideError();
